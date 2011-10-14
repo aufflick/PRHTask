@@ -1,0 +1,237 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		31068CEE1447F01C00DFAECC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31068CED1447F01C00DFAECC /* Foundation.framework */; };
+		31068CF11447F01C00DFAECC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 31068CF01447F01C00DFAECC /* main.m */; };
+		31068CF51447F01C00DFAECC /* PRHTaskTest.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 31068CF41447F01C00DFAECC /* PRHTaskTest.1 */; };
+		31068CFD1447F02600DFAECC /* PRHTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 31068CFC1447F02600DFAECC /* PRHTask.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		31068CE71447F01C00DFAECC /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				31068CF51447F01C00DFAECC /* PRHTaskTest.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		31068CE91447F01C00DFAECC /* PRHTaskTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PRHTaskTest; sourceTree = BUILT_PRODUCTS_DIR; };
+		31068CED1447F01C00DFAECC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		31068CF01447F01C00DFAECC /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		31068CF31447F01C00DFAECC /* PRHTaskTest-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PRHTaskTest-Prefix.pch"; sourceTree = "<group>"; };
+		31068CF41447F01C00DFAECC /* PRHTaskTest.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = PRHTaskTest.1; sourceTree = "<group>"; };
+		31068CFB1447F02600DFAECC /* PRHTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PRHTask.h; path = ../../PRHTask.h; sourceTree = "<group>"; };
+		31068CFC1447F02600DFAECC /* PRHTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PRHTask.m; path = ../../PRHTask.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		31068CE61447F01C00DFAECC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				31068CEE1447F01C00DFAECC /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		31068CDE1447F01C00DFAECC = {
+			isa = PBXGroup;
+			children = (
+				31068CEF1447F01C00DFAECC /* PRHTaskTest */,
+				31068CEC1447F01C00DFAECC /* Frameworks */,
+				31068CEA1447F01C00DFAECC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		31068CEA1447F01C00DFAECC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				31068CE91447F01C00DFAECC /* PRHTaskTest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		31068CEC1447F01C00DFAECC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				31068CED1447F01C00DFAECC /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		31068CEF1447F01C00DFAECC /* PRHTaskTest */ = {
+			isa = PBXGroup;
+			children = (
+				31068CFB1447F02600DFAECC /* PRHTask.h */,
+				31068CFC1447F02600DFAECC /* PRHTask.m */,
+				31068CF01447F01C00DFAECC /* main.m */,
+				31068CF41447F01C00DFAECC /* PRHTaskTest.1 */,
+				31068CF21447F01C00DFAECC /* Supporting Files */,
+			);
+			path = PRHTaskTest;
+			sourceTree = "<group>";
+		};
+		31068CF21447F01C00DFAECC /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				31068CF31447F01C00DFAECC /* PRHTaskTest-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		31068CE81447F01C00DFAECC /* PRHTaskTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 31068CF81447F01C00DFAECC /* Build configuration list for PBXNativeTarget "PRHTaskTest" */;
+			buildPhases = (
+				31068CE51447F01C00DFAECC /* Sources */,
+				31068CE61447F01C00DFAECC /* Frameworks */,
+				31068CE71447F01C00DFAECC /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PRHTaskTest;
+			productName = PRHTaskTest;
+			productReference = 31068CE91447F01C00DFAECC /* PRHTaskTest */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		31068CE01447F01C00DFAECC /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 31068CE31447F01C00DFAECC /* Build configuration list for PBXProject "PRHTaskTest" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 31068CDE1447F01C00DFAECC;
+			productRefGroup = 31068CEA1447F01C00DFAECC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				31068CE81447F01C00DFAECC /* PRHTaskTest */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		31068CE51447F01C00DFAECC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				31068CF11447F01C00DFAECC /* main.m in Sources */,
+				31068CFD1447F02600DFAECC /* PRHTask.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		31068CF61447F01C00DFAECC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		31068CF71447F01C00DFAECC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		31068CF91447F01C00DFAECC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "PRHTaskTest/PRHTaskTest-Prefix.pch";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		31068CFA1447F01C00DFAECC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "PRHTaskTest/PRHTaskTest-Prefix.pch";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		31068CE31447F01C00DFAECC /* Build configuration list for PBXProject "PRHTaskTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				31068CF61447F01C00DFAECC /* Debug */,
+				31068CF71447F01C00DFAECC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		31068CF81447F01C00DFAECC /* Build configuration list for PBXNativeTarget "PRHTaskTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				31068CF91447F01C00DFAECC /* Debug */,
+				31068CFA1447F01C00DFAECC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 31068CE01447F01C00DFAECC /* Project object */;
+}

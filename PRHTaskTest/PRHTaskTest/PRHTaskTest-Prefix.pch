@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'PRHTaskTest' target in the 'PRHTaskTest' project
+//
+
+#ifdef __OBJC__
+	#import <Foundation/Foundation.h>
+#endif
