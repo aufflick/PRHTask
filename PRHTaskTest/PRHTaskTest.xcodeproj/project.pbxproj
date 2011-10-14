@@ -230,6 +230,7 @@
 				31068CFA1447F01C00DFAECC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
