@@ -12,11 +12,17 @@ int main (int argc, char **argv) {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
 	PRHTask *task = [[[PRHTask alloc] init] autorelease];
-	task.launchPath = @"/usr/bin/true";
+	task.launchPath = @"/bin/echo";
+	task.arguments = [NSArray arrayWithObject:@"I am the very model of a modern Major-General"];
 	task.successfulTerminationBlock = ^(PRHTask *completedTask) {
 		NSLog(@"Completed task: %@ with exit status: %i", completedTask, completedTask.terminationStatus);
 	};
+	task.abnormalTerminationBlock = ^(PRHTask *completedTask) {
+		NSLog(@"Task exited abnormally: %@ with exit status: %i", completedTask, completedTask.terminationStatus);
+	};
 	[task launch];
+
+	dispatch_main();
 
 	[pool drain];
 	return EXIT_SUCCESS;
