@@ -12,7 +12,10 @@ int main (int argc, char **argv) {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
 	PRHTask *task = [[[PRHTask alloc] init] autorelease];
-	[task setLaunchPath:@"/usr/bin/true"];
+	task.launchPath = @"/usr/bin/true";
+	task.successfulTerminationBlock = ^(PRHTask *completedTask) {
+		NSLog(@"Completed task: %@ with exit status: %i", completedTask, completedTask.terminationStatus);
+	};
 	[task launch];
 
 	[pool drain];
