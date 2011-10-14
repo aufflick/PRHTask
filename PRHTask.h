@@ -83,6 +83,7 @@ typedef void (^PRHTerminationBlock)(PRHTask *task);
 
 #pragma mark Post process
 
+//These blocks are called on the main thread (main queue).
 @property(copy) PRHTerminationBlock successfulTerminationBlock;
 @property(copy) PRHTerminationBlock abnormalTerminationBlock;
 
