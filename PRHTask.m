@@ -8,11 +8,12 @@
 
 #import "PRHTask.h"
 
+#import <objc/runtime.h>
+
 @interface PRHTask ()
 @property(copy) id standardInput;
 
 @property(nonatomic, readwrite, retain) NSError *standardOutputReadError, *standardErrorReadError;
-@property(nonatomic, retain) id standardOutputObserverToken, standardErrorObserverToken;
 
 - (void) exec __attribute__((noreturn));
 
@@ -21,7 +22,7 @@
 @implementation PRHTask
 {
 	pid_t pid;
-	dispatch_source_t source;
+	dispatch_source_t processExitSource, standardOutputReadSource, standardErrorReadSource;
 	NSMutableData *accumulatedStandardOutputData, *accumulatedStandardErrorData;
 }
 
@@ -46,44 +47,76 @@
 @synthesize successfulTerminationBlock;
 @synthesize abnormalTerminationBlock;
 
-@synthesize standardOutputObserverToken, standardErrorObserverToken;
-
 #pragma mark Implementation guts
 
-- (void) startPipeOrNot:(BOOL)flag pipe:(id)pipe intoData:(NSMutableData *)destination observerTokenPropertyKey:(NSString *)tokenPropertyKey errorPropertyKey:(NSString *)errorPropertyKey {
+- (void) startPipeOrNot:(BOOL)flag pipe:(id)pipe onQueue:(dispatch_queue_t)queue intoData:(NSMutableData *)destination observerSourcePropertyKey:(NSString *)sourcePropertyKey errorSourcePropertyKey:(NSString *)errorPropertyKey {
 	if (flag) {
-		NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+		NSFileHandle *fh = [pipe respondsToSelector:@selector(fileHandleForReading)]
+			? [pipe fileHandleForReading]
+			: pipe;
 
-		id token = [nc addObserverForName:NSFileHandleReadCompletionNotification
-			object:pipe
-			queue:nil
-			usingBlock:^(NSNotification *notification) {
-				NSFileHandle *fh = [notification object];
-				NSData *data = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-				if (data) {
-					if ([data length] > 0) {
-						[destination appendData:data];
-						[fh readInBackgroundAndNotify];
-					} else {
-						//End of file.
-					}
-				} else {
-					NSNumber *errnoNum = [[notification userInfo] objectForKey:@"NSFileHandleError"];
-					NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:[errnoNum intValue] userInfo:nil];
-					[self setValue:error forKey:tokenPropertyKey];
-				}
-			}];
-		[self setValue:token forKey:tokenPropertyKey];
+		dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, [fh fileDescriptor], /*mask*/ 0, queue);
+		dispatch_source_set_event_handler(source, ^(void) {
+			//Cast explanation: In our case, this is a FD, and dispatch_source_get_handle(3) says “The result of this function may be cast directly to the underlying type”.
+			int fd = (int)dispatch_source_get_handle(source);
 
-		if ([pipe respondsToSelector:@selector(fileHandleForReading)]) {
-			NSFileHandle *fh = [pipe fileHandleForReading];
-			[fh readInBackgroundAndNotify];
-		}
+			unsigned long bytesWaiting = dispatch_source_get_data(source);
+			NSMutableData *data = [NSMutableData dataWithLength:bytesWaiting];
+			ssize_t amountRead = read(fd, [data mutableBytes], bytesWaiting);
+			if (amountRead < 0) {
+				NSNumber *errnoNum = [NSNumber numberWithInt:errno];
+				NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:[errnoNum intValue] userInfo:nil];
+				[self setValue:error forKey:errorPropertyKey];
+			} else {
+				[data setLength:amountRead];
+				[destination appendData:data];
+			}
+		});
+
+		object_setInstanceVariable(self, [sourcePropertyKey UTF8String], source);
+
+		dispatch_resume(source);
+	}
+}
+
+- (NSFileHandle *) fileHandleWithWantedSelector:(SEL)wantedSel closingFileHandleFromUnwantedSelector:(SEL)unwantedSel bothFromPipe:(id)possiblePipe {
+	NSFileHandle *fh = nil;
+	NSPipe *pipe = possiblePipe;
+
+	if ([possiblePipe respondsToSelector:unwantedSel])
+		[[pipe fileHandleForReading] closeFile];
+
+	if ([possiblePipe respondsToSelector:wantedSel])
+		fh = [pipe fileHandleForWriting];
+	else
+		fh = possiblePipe;
+
+	return fh;
+}
+- (NSFileHandle *) readingFileHandleFromPipeClosingWriteEnd:(id)possiblePipe {
+	return [self fileHandleWithWantedSelector:@selector(fileHandleForReading) closingFileHandleFromUnwantedSelector:@selector(fileHandleForWriting) bothFromPipe:possiblePipe];
+}
+- (NSFileHandle *) writingFileHandleFromPipeClosingReadEnd:(id)possiblePipe {
+	return [self fileHandleWithWantedSelector:@selector(fileHandleForWriting) closingFileHandleFromUnwantedSelector:@selector(fileHandleForReading) bothFromPipe:possiblePipe];
+}
+- (void) connectPipe:(id)possiblePipe toFileDescriptor:(int)fd {
+	NSParameterAssert(pid == 0);
+
+	if (possiblePipe) {
+		NSFileHandle *fh = (fd == STDIN_FILENO)
+			? [self readingFileHandleFromPipeClosingWriteEnd:self.standardOutput]
+			: [self writingFileHandleFromPipeClosingReadEnd:self.standardOutput];
+		dup2([fh fileDescriptor], fd);
+		[fh closeFile];
 	}
 }
 
 - (void) exec {
 	NSArray *args = [[NSArray arrayWithObject:self.launchPath] arrayByAddingObjectsFromArray:self.arguments];
+
+	[self connectPipe:self.standardInput toFileDescriptor:STDIN_FILENO];
+	[self connectPipe:self.standardOutput toFileDescriptor:STDOUT_FILENO];
+	[self connectPipe:self.standardError toFileDescriptor:STDERR_FILENO];
 
 	char **argv = malloc(sizeof(char *) * ([args count] + 1));
 	char **argvp = argv;
@@ -110,16 +143,22 @@
 }
 
 - (void) launch {
+	//It may be better to have a property for the queue.
+	dispatch_queue_t defaultQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, /*flags*/ 0);
+	dispatch_queue_t highQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, /*flags*/ 0);
+
 	[self startPipeOrNot:[self accumulatesStandardOutput] 
-					pipe:[self standardOutput] 
+					pipe:[self standardOutput]
+				 onQueue:highQueue
 				intoData:accumulatedStandardOutputData 
-		observerTokenPropertyKey:@"standardOutputObserverToken" 
-		errorPropertyKey:@"standardOutputReadError"];
+		observerSourcePropertyKey:@"standardOutputObserverToken" 
+		errorSourcePropertyKey:@"standardOutputReadError"];
 	[self startPipeOrNot:[self accumulatesStandardError] 
 					pipe:[self standardError] 
+				 onQueue:highQueue
 				intoData:accumulatedStandardErrorData 
-		observerTokenPropertyKey:@"standardErrorObserverToken" 
-		errorPropertyKey:@"standardErrorReadError"];
+		observerSourcePropertyKey:@"standardErrorObserverToken" 
+		errorSourcePropertyKey:@"standardErrorReadError"];
 
 	pid = fork();
 	if (pid == 0) {
@@ -131,10 +170,8 @@
 
 	__block PRHTask *bself = self;
 
-	//It may be better to have a property for the queue.
-	dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, /*flags*/ 0);
-	source = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, pid, DISPATCH_PROC_EXIT, queue);
-	dispatch_source_set_event_handler(source, ^(void) {
+	processExitSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, pid, DISPATCH_PROC_EXIT, defaultQueue);
+	dispatch_source_set_event_handler(processExitSource, ^(void) {
 		int status = -1;
 		waitpid(pid, &status, /*options*/ 0);
 		PRHTerminationBlock block = (WEXITSTATUS(status) == 0)
@@ -144,7 +181,7 @@
 			block(bself);
 		});
 	});
-	dispatch_resume(source);
+	dispatch_resume(processExitSource);
 }
 
 - (void) terminate {
@@ -152,16 +189,10 @@
 }
 
 - (void) dealloc {
-	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+	dispatch_release(standardOutputReadSource);
+	dispatch_release(standardErrorReadSource);
 
-	if (standardOutputObserverToken) {
-		[nc removeObserver:standardOutputObserverToken];
-		[standardOutputObserverToken release];
-	}
-	if (standardErrorObserverToken) {
-		[nc removeObserver:standardErrorObserverToken];
-		[standardErrorObserverToken release];
-	}
+	dispatch_release(processExitSource);
 
 	[accumulatedStandardOutputData release];
 	[accumulatedStandardErrorData release];
@@ -170,8 +201,6 @@
 
 	[successfulTerminationBlock release];
 	[abnormalTerminationBlock release];
-
-	dispatch_release(source);
 
 	[super dealloc];
 }
