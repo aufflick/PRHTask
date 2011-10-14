@@ -16,9 +16,11 @@ int main (int argc, char **argv) {
 	task.arguments = [NSArray arrayWithObject:@"I am the very model of a modern Major-General"];
 	task.successfulTerminationBlock = ^(PRHTask *completedTask) {
 		NSLog(@"Completed task: %@ with exit status: %i", completedTask, completedTask.terminationStatus);
+		exit(EXIT_SUCCESS);
 	};
 	task.abnormalTerminationBlock = ^(PRHTask *completedTask) {
 		NSLog(@"Task exited abnormally: %@ with exit status: %i", completedTask, completedTask.terminationStatus);
+		exit(EXIT_FAILURE);
 	};
 	[task launch];
 
