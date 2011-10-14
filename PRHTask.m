@@ -212,7 +212,8 @@
 	[descriptionChunks addObject:@"in CWD"];
 	if (!(self.currentDirectoryPath))
 		[descriptionChunks addObject:@"(inherited)"];
-	[descriptionChunks addObject:self.currentDirectoryPath ?: [[NSFileManager defaultManager] currentDirectoryPath]];
+	NSFileManager *mgr = [[[NSFileManager alloc] init] autorelease];
+	[descriptionChunks addObject:self.currentDirectoryPath ?: [mgr currentDirectoryPath]];
 	return [NSString stringWithFormat:@"<%@>", [descriptionChunks componentsJoinedByString:@" "]];
 }
 
