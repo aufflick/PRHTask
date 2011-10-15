@@ -37,6 +37,8 @@
 @synthesize standardOutput;
 @synthesize standardError;
 
+@synthesize environment;
+
 @synthesize trimWhitespaceFromAccumulatedOutputs;
 
 @synthesize accumulatedStandardOutputData;
@@ -117,6 +119,11 @@
 	[self connectPipe:self.standardInput toFileDescriptor:STDIN_FILENO];
 	[self connectPipe:self.standardOutput toFileDescriptor:STDOUT_FILENO];
 	[self connectPipe:self.standardError toFileDescriptor:STDERR_FILENO];
+
+	for (NSString *key in self.environment) {
+		NSString *value = [self.environment objectForKey:key];
+		setenv([key UTF8String], [value UTF8String], /*overwrite*/ 1);
+	}
 
 	char **argv = malloc(sizeof(char *) * ([args count] + 1));
 	char **argvp = argv;

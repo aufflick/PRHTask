@@ -15,7 +15,6 @@
  *It also uses formal properties wherever appropriate and (currently) uses GCD internally.
  *
  *Currently, this does not provide any way to hook standard input up to anything. You can either let it be inherited (default, as in NSTask) or nullify it (connect it to /dev/null).
- *Also, this does not yet have a formal version of NSTask's environment property. Until then, setting the process's environment is unsupported.
  */
 
 @class PRHTask;
@@ -50,6 +49,8 @@ typedef void (^PRHTerminationBlock)(PRHTask *task);
 //TODO: standardInput
 @property(copy) id standardOutput;
 @property(copy) id standardError;
+
+@property(copy) NSDictionary *environment;
 
 #pragma mark -
 
