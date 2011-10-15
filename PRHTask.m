@@ -220,6 +220,13 @@
 	[successfulTerminationBlock release];
 	[abnormalTerminationBlock release];
 
+	[launchPath release];
+	[arguments release];
+	[currentDirectoryPath release];
+	[standardOutput release];
+	[standardError release];
+	[environment release];
+
 	[super dealloc];
 }
 
