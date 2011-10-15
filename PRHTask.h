@@ -27,7 +27,7 @@ typedef void (^PRHTerminationBlock)(PRHTask *task);
 //taskWithProgramNameAndArguments: passes the array to argumentsIncludingProgramName (see below).
 + (id) taskWithProgramNameAndArguments:(NSArray *)arguments;
 //Wraps taskWithProgramNameAndArguments:, enabling you to pass the name and arguments individually without rolling them into an array yourself first.
-+ (id) taskWithProgramName:(NSString *)name arguments:(id)arg1, ...;
++ (id) taskWithProgramName:(NSString *)name arguments:(id)arg1, ... NS_REQUIRES_NIL_TERMINATION;
 
 //init works, too.
 
