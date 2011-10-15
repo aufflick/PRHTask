@@ -228,10 +228,14 @@
 	va_list argl;
 	va_start(argl, arg1);
 
-	NSMutableArray *array = [NSMutableArray array];
-	id arg = nil;
-	while ((arg = va_arg(argl, id))) {
-		[array addObject:arg];
+	NSMutableArray *array = [NSMutableArray arrayWithObject:name];
+	if (arg1) {
+		[array addObject:arg1];
+
+		id arg = nil;
+		while ((arg = va_arg(argl, id))) {
+			[array addObject:arg];
+		}
 	}
 
 	va_end(argl);
