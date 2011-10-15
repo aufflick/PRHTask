@@ -125,6 +125,12 @@
 		setenv([key UTF8String], [value UTF8String], /*overwrite*/ 1);
 	}
 
+	NSString *desiredCWD = self.currentDirectoryPath;
+	if (desiredCWD) {
+		int changed = chdir([desiredCWD fileSystemRepresentation]);
+		NSAssert(changed == 0, @"Could not change CWD to %@", desiredCWD);
+	}
+
 	char **argv = malloc(sizeof(char *) * ([args count] + 1));
 	char **argvp = argv;
 
