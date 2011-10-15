@@ -237,21 +237,25 @@
 
 	NSMutableArray *array = [NSMutableArray arrayWithObject:name];
 	if (arg1) {
-		[array addObject:arg1];
+		void (^addToArray)(NSMutableArray *, id) = ^void(NSMutableArray *theArray, id argToAdd) {
+			if ([argToAdd isKindOfClass:[NSString class]]) {
+				[theArray addObject:argToAdd];
+			} else if ([argToAdd isKindOfClass:[NSArray class]]) {
+				for (id subarg in argToAdd) {
+					NSAssert([subarg isKindOfClass:[NSString class]], @"Array of args %@ passed that contains a non-string (%@)", argToAdd, subarg);
+				}
+
+				[theArray addObjectsFromArray:argToAdd];
+			} else {
+				NSAssert([argToAdd isKindOfClass:[NSString class]] || [argToAdd isKindOfClass:[NSArray class]], @"Only strings and arrays of strings are valid arguments");
+			}
+		};
+
+		addToArray(array, arg1);
 
 		id arg = nil;
 		while ((arg = va_arg(argl, id))) {
-			if ([arg isKindOfClass:[NSString class]]) {
-				[array addObject:arg];
-			} else if ([arg isKindOfClass:[NSArray class]]) {
-				for (id subarg in arg) {
-					NSAssert([subarg isKindOfClass:[NSString class]], @"Array of args %@ passed that contains a non-string (%@)", arg, subarg);
-				}
-
-				[array addObjectsFromArray:arg];
-			} else {
-				NSAssert([arg isKindOfClass:[NSString class]] || [arg isKindOfClass:[NSArray class]], @"Only strings and arrays of strings are valid arguments");
-			}
+			addToArray(array, arg);
 		}
 	}
 
