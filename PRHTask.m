@@ -202,10 +202,15 @@
 }
 
 - (void) dealloc {
-	dispatch_release(standardOutputReadSource);
-	dispatch_release(standardErrorReadSource);
+	void (^PRHDispatchRelease)(void *) = ^void(void *object) {
+		if (object != NULL)
+			dispatch_release(object);
+	};
 
-	dispatch_release(processExitSource);
+	PRHDispatchRelease(standardOutputReadSource);
+	PRHDispatchRelease(standardErrorReadSource);
+
+	PRHDispatchRelease(processExitSource);
 
 	[accumulatedStandardOutputData release];
 	[accumulatedStandardErrorData release];
