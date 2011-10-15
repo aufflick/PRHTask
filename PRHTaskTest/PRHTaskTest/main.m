@@ -11,7 +11,8 @@
 int main (int argc, char **argv) {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-	PRHTask *task = [PRHTask taskWithProgramName:@"echo" arguments:@"I am the very model of a modern Major-General", nil];
+	//When using the varargs method, strings and arrays of strings can be mixed in the arguments parameter list.
+	PRHTask *task = [PRHTask taskWithProgramName:@"echo" arguments:@"I am the very model of a", [NSArray arrayWithObjects:@"modern", @"Major-General", nil], nil];
 	task.accumulatesStandardOutput = YES;
 
 	task.successfulTerminationBlock = ^(PRHTask *completedTask) {

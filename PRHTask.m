@@ -234,7 +234,17 @@
 
 		id arg = nil;
 		while ((arg = va_arg(argl, id))) {
-			[array addObject:arg];
+			if ([arg isKindOfClass:[NSString class]]) {
+				[array addObject:arg];
+			} else if ([arg isKindOfClass:[NSArray class]]) {
+				for (id subarg in arg) {
+					NSAssert([subarg isKindOfClass:[NSString class]], @"Array of args %@ passed that contains a non-string (%@)", arg, subarg);
+				}
+
+				[array addObjectsFromArray:arg];
+			} else {
+				NSAssert([arg isKindOfClass:[NSString class]] || [arg isKindOfClass:[NSArray class]], @"Only strings and arrays of strings are valid arguments");
+			}
 		}
 	}
 
