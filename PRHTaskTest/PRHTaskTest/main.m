@@ -11,9 +11,7 @@
 int main (int argc, char **argv) {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-	PRHTask *task = [[[PRHTask alloc] init] autorelease];
-	task.launchPath = @"/bin/echo";
-	task.arguments = [NSArray arrayWithObject:@"I am the very model of a modern Major-General"];
+	PRHTask *task = [PRHTask taskWithProgramName:@"echo" arguments:@"I am the very model of a modern Major-General", nil];
 	task.accumulatesStandardOutput = YES;
 
 	task.successfulTerminationBlock = ^(PRHTask *completedTask) {
