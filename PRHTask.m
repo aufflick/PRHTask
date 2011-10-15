@@ -144,18 +144,17 @@
 
 - (void) launch {
 	//It may be better to have a property for the queue.
-	dispatch_queue_t defaultQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, /*flags*/ 0);
-	dispatch_queue_t highQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, /*flags*/ 0);
+	dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, /*flags*/ 0);
 
 	[self startPipeOrNot:[self accumulatesStandardOutput] 
 					pipe:[self standardOutput]
-				 onQueue:highQueue
+				 onQueue:queue
 				intoData:accumulatedStandardOutputData 
 		observerSourcePropertyKey:@"standardOutputObserverToken" 
 		errorSourcePropertyKey:@"standardOutputReadError"];
 	[self startPipeOrNot:[self accumulatesStandardError] 
 					pipe:[self standardError] 
-				 onQueue:highQueue
+				 onQueue:queue
 				intoData:accumulatedStandardErrorData 
 		observerSourcePropertyKey:@"standardErrorObserverToken" 
 		errorSourcePropertyKey:@"standardErrorReadError"];
@@ -171,7 +170,7 @@
 	__block PRHTask *bself = self;
 	pid_t launchedPID = pid; //Avert the retain cycle we'd have if the block accessed the ivar.
 
-	processExitSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, pid, DISPATCH_PROC_EXIT, defaultQueue);
+	processExitSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, pid, DISPATCH_PROC_EXIT, queue);
 	dispatch_source_set_event_handler(processExitSource, ^(void) {
 		int status = -1;
 		waitpid(launchedPID, &status, /*options*/ 0);
