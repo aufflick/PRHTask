@@ -169,11 +169,12 @@
 	}
 
 	__block PRHTask *bself = self;
+	pid_t launchedPID = pid; //Avert the retain cycle we'd have if the block accessed the ivar.
 
 	processExitSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, pid, DISPATCH_PROC_EXIT, defaultQueue);
 	dispatch_source_set_event_handler(processExitSource, ^(void) {
 		int status = -1;
-		waitpid(pid, &status, /*options*/ 0);
+		waitpid(launchedPID, &status, /*options*/ 0);
 		PRHTerminationBlock block = (WEXITSTATUS(status) == 0)
 			? [bself successfulTerminationBlock]
 			: [bself abnormalTerminationBlock];
