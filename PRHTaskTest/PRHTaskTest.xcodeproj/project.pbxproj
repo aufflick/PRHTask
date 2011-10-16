@@ -118,6 +118,9 @@
 /* Begin PBXProject section */
 		31068CE01447F01C00DFAECC /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = 31068CE31447F01C00DFAECC /* Build configuration list for PBXProject "PRHTaskTest" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
