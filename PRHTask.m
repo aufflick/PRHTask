@@ -144,6 +144,7 @@
 	*argvp = NULL;
 
 	execv([self.launchPath fileSystemRepresentation], argv);
+	__builtin_unreachable();
 }
 
 #pragma mark Inherited and NSTask methods
