@@ -57,7 +57,7 @@
 			? [pipe fileHandleForReading]
 			: pipe;
 
-		dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, [fh fileDescriptor], /*mask*/ 0, queue);
+		dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, (uintptr_t)[fh fileDescriptor], /*mask*/ 0, queue);
 		dispatch_source_set_event_handler(source, ^(void) {
 			//Cast explanation: In our case, this is a FD, and dispatch_source_get_handle(3) says “The result of this function may be cast directly to the underlying type”.
 			int fd = (int)dispatch_source_get_handle(source);
@@ -70,7 +70,8 @@
 				NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:[errnoNum intValue] userInfo:nil];
 				[self setValue:error forKey:errorPropertyKey];
 			} else {
-				[data setLength:amountRead];
+				//We can cast to unsigned here because the if establishes that amountRead is non-negative.
+				[data setLength:(NSUInteger)amountRead];
 				[destination appendData:data];
 			}
 		});
@@ -184,7 +185,7 @@
 	__block PRHTask *bself = self;
 	pid_t launchedPID = pid; //Avert the retain cycle we'd have if the block accessed the ivar.
 
-	processExitSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, pid, DISPATCH_PROC_EXIT, queue);
+	processExitSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, (uintptr_t)pid, DISPATCH_PROC_EXIT, queue);
 	dispatch_source_set_event_handler(processExitSource, ^(void) {
 		int status = -1;
 		waitpid(launchedPID, &status, /*options*/ 0);
