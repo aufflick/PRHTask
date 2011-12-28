@@ -34,6 +34,7 @@
 		31068CF41447F01C00DFAECC /* PRHTaskTest.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = PRHTaskTest.1; sourceTree = "<group>"; };
 		31068CFB1447F02600DFAECC /* PRHTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PRHTask.h; path = ../../PRHTask.h; sourceTree = "<group>"; };
 		31068CFC1447F02600DFAECC /* PRHTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PRHTask.m; path = ../../PRHTask.m; sourceTree = "<group>"; };
+		31C56F2014AAE050006F476B /* Warnings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +53,7 @@
 			isa = PBXGroup;
 			children = (
 				31068CEF1447F01C00DFAECC /* PRHTaskTest */,
+				31C56F2014AAE050006F476B /* Warnings.xcconfig */,
 				31068CEC1447F01C00DFAECC /* Frameworks */,
 				31068CEA1447F01C00DFAECC /* Products */,
 			);
@@ -153,6 +155,7 @@
 /* Begin XCBuildConfiguration section */
 		31068CF61447F01C00DFAECC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 31C56F2014AAE050006F476B /* Warnings.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -179,6 +182,7 @@
 		};
 		31068CF71447F01C00DFAECC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 31C56F2014AAE050006F476B /* Warnings.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
