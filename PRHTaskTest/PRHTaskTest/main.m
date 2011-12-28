@@ -9,7 +9,7 @@
 #import "PRHTask.h"
 
 int main (int argc, char **argv) {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
 
 	//When using the varargs method, strings and arrays of strings can be mixed in the arguments parameter list.
 	PRHTask *task = [PRHTask taskWithProgramName:@"echo" arguments:@"I am the very model of a", [NSArray arrayWithObjects:@"modern", @"Major-General", nil], nil];
@@ -30,7 +30,7 @@ int main (int argc, char **argv) {
 
 	dispatch_main();
 
-	[pool drain];
+	} //@autoreleasepool
 	return EXIT_SUCCESS;
 }
 
