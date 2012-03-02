@@ -259,9 +259,10 @@
 
 	processExitSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, (uintptr_t)pid, DISPATCH_PROC_EXIT, queue);
 	dispatch_source_set_event_handler(processExitSource, ^(void) {
-		terminationStatus = -1;
-		waitpid(launchedPID, &terminationStatus, /*options*/ 0);
-		PRHTerminationBlock block = (WEXITSTATUS(terminationStatus) == 0)
+		int status = -1;
+		waitpid(launchedPID, &status, /*options*/ 0);
+        terminationStatus = WEXITSTATUS(status);
+		PRHTerminationBlock block = (terminationStatus == 0)
 			? [bself successfulTerminationBlock]
 			: [bself abnormalTerminationBlock];
 		dispatch_async(dispatch_get_main_queue(), ^(void) {
