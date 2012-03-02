@@ -15,8 +15,6 @@
 
 @property(nonatomic, readwrite, retain) NSError *standardOutputReadError, *standardErrorReadError;
 
-- (void) exec __attribute__((noreturn));
-
 @end
 
 @implementation PRHTask
@@ -102,51 +100,6 @@
 - (NSFileHandle *) writingFileHandleFromPipeClosingReadEnd:(id)possiblePipe {
 	return [self fileHandleWithWantedSelector:@selector(fileHandleForWriting) closingFileHandleFromUnwantedSelector:@selector(fileHandleForReading) bothFromPipe:possiblePipe];
 }
-- (void) connectPipe:(id)possiblePipe toFileDescriptor:(int)fd {
-	NSParameterAssert(pid == 0);
-
-	if (possiblePipe) {
-		NSFileHandle *fh = (fd == STDIN_FILENO)
-			? [self readingFileHandleFromPipeClosingWriteEnd:self.standardOutput]
-			: [self writingFileHandleFromPipeClosingReadEnd:self.standardOutput];
-		dup2([fh fileDescriptor], fd);
-		[fh closeFile];
-	}
-}
-
-- (void) exec {
-	NSArray *args = [[NSArray arrayWithObject:self.launchPath] arrayByAddingObjectsFromArray:self.arguments];
-
-	[self connectPipe:self.standardInput toFileDescriptor:STDIN_FILENO];
-	[self connectPipe:self.standardOutput toFileDescriptor:STDOUT_FILENO];
-	[self connectPipe:self.standardError toFileDescriptor:STDERR_FILENO];
-
-	for (NSString *key in self.environment) {
-		NSString *value = [self.environment objectForKey:key];
-		setenv([key UTF8String], [value UTF8String], /*overwrite*/ 1);
-	}
-
-	NSString *desiredCWD = self.currentDirectoryPath;
-	if (desiredCWD) {
-		int changed = chdir([desiredCWD fileSystemRepresentation]);
-		NSAssert(changed == 0, @"Could not change CWD to %@", desiredCWD);
-	}
-
-	char **argv = malloc(sizeof(char *) * ([args count] + 1));
-	char **argvp = argv;
-
-	for (NSString *arg in args) {
-		NSMutableData *argData = [[[arg dataUsingEncoding:NSUTF8StringEncoding] mutableCopy] autorelease];
-		//Null-terminate
-		[argData setLength:[argData length] + 1];
-
-		*(argvp++) = [argData mutableBytes];
-	}
-	*argvp = NULL;
-
-	execv([self.launchPath fileSystemRepresentation], argv);
-	__builtin_unreachable();
-}
 
 #pragma mark Inherited and NSTask methods
 
@@ -156,6 +109,8 @@
 	}
 	return self;
 }
+
+
 
 - (void) launch {
 	//It may be better to have a property for the queue.
@@ -173,14 +128,131 @@
 				intoData:accumulatedStandardErrorData 
 		observerSourcePropertyKey:@"standardErrorObserverToken" 
 		errorSourcePropertyKey:@"standardErrorReadError"];
+    
+    // Preparing for child
+    // We can't do this stuff in a convenience method etc. because some of the required Cocoa/Core Foundation
+    // is not save after fork.
+    // See http://opensource.apple.com/source/CF/CF-550/CFRuntime.c
+    
+    NSArray *args = [[NSArray arrayWithObject:self.launchPath] arrayByAddingObjectsFromArray:self.arguments];
+    
+	for (NSString *key in self.environment) {
+		NSString *value = [self.environment objectForKey:key];
+		setenv([key UTF8String], [value UTF8String], /*overwrite*/ 1);
+	}
+    
+	NSString *desiredCWD = self.currentDirectoryPath;
+	if (desiredCWD) {
+		int changed = chdir([desiredCWD fileSystemRepresentation]);
+		NSAssert(changed == 0, @"Could not change CWD to %@", desiredCWD);
+	}
+    
+	char **argv = malloc(sizeof(char *) * ([args count] + 1));
+	char **argvp = argv;
+    
+	for (NSString *arg in args) {
+		NSMutableData *argData = [[[arg dataUsingEncoding:NSUTF8StringEncoding] mutableCopy] autorelease];
+		//Null-terminate
+		[argData setLength:[argData length] + 1];
+        
+		*(argvp++) = [argData mutableBytes];
+	}
+	*argvp = NULL;
 
+    const char * path = [self.launchPath fileSystemRepresentation];
+    
+    int childStdInReadFileDes, childStdInWriteFileDes;
+    int childStdOutReadFileDes, childStdOutWriteFileDes;
+    int childStdErrReadFileDes, childStdErrWriteFileDes;
+    
+    if (!self.standardInput)
+    {
+        childStdInReadFileDes = -1;
+        childStdInWriteFileDes = -1;
+    }
+    else if ([self.standardInput isKindOfClass:[NSPipe class]])
+    {
+        childStdInReadFileDes = [[(NSPipe *)self.standardInput fileHandleForReading] fileDescriptor];
+        childStdInWriteFileDes = [[(NSPipe *)self.standardInput fileHandleForWriting] fileDescriptor];
+    }
+    else
+    {
+        childStdInReadFileDes = [(NSFileHandle *)self.standardInput fileDescriptor];
+        childStdInWriteFileDes = -1;
+    }
+    
+    if (!self.standardOutput)
+    {
+        childStdOutReadFileDes = -1;
+        childStdOutWriteFileDes = -1;
+    }
+    else if ([self.standardOutput isKindOfClass:[NSPipe class]])
+    {
+        childStdOutReadFileDes = [[(NSPipe *)self.standardOutput fileHandleForReading] fileDescriptor];
+        childStdOutWriteFileDes = [[(NSPipe *)self.standardOutput fileHandleForWriting] fileDescriptor];
+    }
+    else
+    {
+        childStdOutReadFileDes = -1;
+        childStdOutWriteFileDes = [(NSFileHandle *)self.standardOutput fileDescriptor];
+    }
+
+    if (!self.standardError)
+    {
+        childStdErrReadFileDes = -1;
+        childStdErrWriteFileDes = -1;
+    }
+    else if ([self.standardError isKindOfClass:[NSPipe class]])
+    {
+        childStdErrReadFileDes = [[(NSPipe *)self.standardError fileHandleForReading] fileDescriptor];
+        childStdErrWriteFileDes = [[(NSPipe *)self.standardError fileHandleForWriting] fileDescriptor];
+    }
+    else
+    {
+        childStdErrReadFileDes = -1;
+        childStdErrWriteFileDes = [(NSFileHandle *)self.standardError fileDescriptor];
+    }
+    
 	pid = fork();
 	if (pid == 0) {
 		//Child process
-		[self exec];
+        
+        if (childStdInReadFileDes >= 0)
+        {
+            dup2(childStdInReadFileDes, STDIN_FILENO);
+            close(childStdInReadFileDes);
+        }
+        if (childStdInWriteFileDes >= 0)
+            close(childStdInWriteFileDes);
+        if (childStdOutWriteFileDes >= 0)
+        {
+            dup2(childStdOutWriteFileDes, STDOUT_FILENO);
+            close(childStdOutWriteFileDes);
+        }
+        if (childStdOutReadFileDes >= 0)
+            close(childStdOutReadFileDes);
+        if (childStdErrWriteFileDes >= 0)
+        {
+            dup2(childStdErrWriteFileDes, STDERR_FILENO);
+            close(childStdErrWriteFileDes);
+        }
+        if (childStdErrReadFileDes >= 0)
+            close(childStdErrReadFileDes);
+        
+        execv(path, argv);
+        __builtin_unreachable();
 	} else {
 		NSAssert(pid > 0, @"Couldn't fork: %s", strerror(errno));
 	}
+    
+    free(argv);
+    
+    if (childStdInReadFileDes >= 0)
+        close(childStdInReadFileDes);
+    if (childStdOutWriteFileDes >= 0)
+        close(childStdOutWriteFileDes);
+    if (childStdErrWriteFileDes >= 0)
+        close(childStdErrWriteFileDes);
 
 	__block PRHTask *bself = self;
 	pid_t launchedPID = pid; //Avert the retain cycle we'd have if the block accessed the ivar.
