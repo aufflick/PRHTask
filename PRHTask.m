@@ -247,12 +247,8 @@
     
     free(argv);
     
-    if (childStdInReadFileDes >= 0)
-        close(childStdInReadFileDes);
-    if (childStdOutWriteFileDes >= 0)
-        close(childStdOutWriteFileDes);
-    if (childStdErrWriteFileDes >= 0)
-        close(childStdErrWriteFileDes);
+    // should we be closing one end of the pipes here?
+    // doing what I thought was right resulted in occasional sigpipes (err 141) at the child end
 
 	__block PRHTask *bself = self;
 	pid_t launchedPID = pid; //Avert the retain cycle we'd have if the block accessed the ivar.
