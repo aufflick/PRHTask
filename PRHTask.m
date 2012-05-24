@@ -247,6 +247,8 @@
     
     free(argv);
     
+    processIdentifier = pid;
+    
     // should we be closing one end of the pipes here?
     // doing what I thought was right resulted in occasional sigpipes (err 141) at the child end
 
